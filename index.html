@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASM Postpartum Taper</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header>
+    <h1>ASM Postpartum Taper</h1>
+    <p>Dose tapering guide for anti-seizure medication after delivery</p>
+  </header>
+
+  <main>
+
+    <div class="disclaimer">
+      <strong>For practitioner use only.</strong>
+      This tool provides a suggested framework based on published pharmacokinetic principles.
+      It does not replace clinical judgement or individualised patient assessment.
+    </div>
+
+    <!-- ── STEP 1: Medication ─────────────────────────────── -->
+    <section class="card" id="step-medication">
+      <h2><span class="step-num">1</span> Select medication</h2>
+      <div class="med-select">
+        <button class="med-btn" id="btn-ltg" data-med="ltg">
+          <span class="med-abbr">LTG</span>
+          <span class="med-name">Lamotrigine</span>
+        </button>
+        <button class="med-btn" id="btn-lev" data-med="lev">
+          <span class="med-abbr">LEV</span>
+          <span class="med-name">Levetiracetam</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── STEP 2: Doses ─────────────────────────────────── -->
+    <section class="card hidden" id="step-doses">
+      <h2><span class="step-num">2</span> Enter doses</h2>
+
+      <div class="rec-box" id="rec-box">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="current-dose">
+            Current dose at delivery (mg/day)
+            <span class="req">*</span>
+          </label>
+          <input type="number" id="current-dose" min="1" step="1" placeholder="e.g. 400" />
+        </div>
+
+        <div class="form-group">
+          <label for="pre-preg-dose">
+            Pre-pregnancy dose (mg/day)
+          </label>
+          <input type="number" id="pre-preg-dose" min="0" step="1" placeholder="e.g. 200" />
+          <span class="hint">Leave blank if unknown — target will be estimated</span>
+        </div>
+
+        <div class="form-group">
+          <label for="doses-per-day">Doses per day <span class="req">*</span></label>
+          <select id="doses-per-day">
+            <option value="1">Once daily</option>
+            <option value="2" selected>Twice daily</option>
+            <option value="3">Three times daily</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="delivery-date">Delivery date</label>
+          <input type="date" id="delivery-date" />
+          <span class="hint">Optional — adds dates to the schedule</span>
+        </div>
+      </div>
+
+      <!-- Optional: plasma level -->
+      <details class="optional-section">
+        <summary>Plasma level (optional)</summary>
+        <div class="form-grid" style="margin-top:1rem;">
+          <div class="form-group">
+            <label for="plasma-current">Level at delivery</label>
+            <div class="input-row">
+              <input type="number" id="plasma-current" min="0" step="0.1" placeholder="e.g. 18" />
+              <span class="unit" id="plasma-unit">mg/L</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="plasma-prepreg">Pre-pregnancy level (if known)</label>
+            <div class="input-row">
+              <input type="number" id="plasma-prepreg" min="0" step="0.1" placeholder="e.g. 8" />
+              <span class="unit">mg/L</span>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost" id="back-btn">← Back</button>
+        <button class="btn btn-primary" id="generate-btn">Generate taper plan →</button>
+      </div>
+    </section>
+
+    <!-- ── RESULTS ─────────────────────────────────────────── -->
+    <section class="card hidden" id="results-section">
+      <div class="results-header">
+        <h2>Taper plan</h2>
+        <div class="results-actions">
+          <button class="btn btn-ghost" id="edit-btn">← Edit</button>
+          <button class="btn btn-ghost" id="print-btn">Print / PDF</button>
+        </div>
+      </div>
+      <div id="results-content"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    ASM Postpartum Taper &mdash; for practitioner use only
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

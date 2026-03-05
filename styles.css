@@ -1,0 +1,426 @@
+/* ============================================================
+   ASM Postpartum Taper — Stylesheet
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f0f4f8;
+  color: #1a2535;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+header {
+  background: #1b4f8a;
+  color: #fff;
+  padding: 1.4rem 2rem;
+}
+
+header h1 {
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+header p {
+  margin-top: 0.2rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* ── Main ─────────────────────────────────────────────────── */
+main {
+  flex: 1;
+  max-width: 680px;
+  width: 100%;
+  margin: 1.75rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Disclaimer ───────────────────────────────────────────── */
+.disclaimer {
+  background: #fff8e1;
+  border-left: 4px solid #f5a623;
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  font-size: 0.83rem;
+  color: #5a4000;
+  line-height: 1.55;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.75rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+}
+
+.card h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1b4f8a;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  background: #1b4f8a;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.hidden { display: none !important; }
+
+/* ── Medication selector ──────────────────────────────────── */
+.med-select {
+  display: flex;
+  gap: 1rem;
+}
+
+.med-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.25rem 1rem;
+  border: 2px solid #d0daea;
+  border-radius: 8px;
+  background: #fafcff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.med-btn:hover {
+  border-color: #1b4f8a;
+  background: #eef4fc;
+}
+
+.med-btn.selected {
+  border-color: #1b4f8a;
+  background: #eef4fc;
+  box-shadow: 0 0 0 3px rgba(27,79,138,0.15);
+}
+
+.med-abbr {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1b4f8a;
+  letter-spacing: 0.03em;
+}
+
+.med-name {
+  font-size: 0.85rem;
+  color: #4a5a72;
+}
+
+/* ── Clinical recommendation box ─────────────────────────── */
+.rec-box {
+  background: #eef4fc;
+  border-left: 4px solid #1b4f8a;
+  border-radius: 4px;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.875rem;
+  color: #1a2535;
+  margin-bottom: 1.4rem;
+  line-height: 1.65;
+}
+
+.rec-box strong { color: #1b4f8a; }
+
+/* ── Form ─────────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2d3d54;
+}
+
+.req { color: #c0392b; }
+
+input[type="number"],
+input[type="date"],
+select {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #bbc7da;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #1a2535;
+  background: #fafcff;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #1b4f8a;
+  box-shadow: 0 0 0 3px rgba(27,79,138,0.12);
+}
+
+input.invalid { border-color: #c0392b; }
+
+.hint {
+  font-size: 0.75rem;
+  color: #6b7a92;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input-row input { flex: 1; }
+
+.unit {
+  font-size: 0.82rem;
+  color: #6b7a92;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Optional collapsible section */
+.optional-section {
+  margin-top: 1.1rem;
+  border: 1px solid #dde4ee;
+  border-radius: 5px;
+  padding: 0.75rem 1rem;
+}
+
+.optional-section summary {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a5a72;
+  cursor: pointer;
+  user-select: none;
+}
+
+.optional-section summary:hover { color: #1b4f8a; }
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.4rem;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-primary {
+  background: #1b4f8a;
+  color: #fff;
+  margin-left: auto;
+}
+
+.btn-primary:hover { background: #154070; }
+
+.btn-ghost {
+  background: transparent;
+  color: #1b4f8a;
+  border: 1px solid #bbc7da;
+}
+
+.btn-ghost:hover { background: #eef4fc; }
+
+/* ── Results ──────────────────────────────────────────────── */
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.4rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.results-header h2 { margin-bottom: 0; }
+
+.results-actions { display: flex; gap: 0.5rem; }
+
+/* Summary strip */
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.summary-chip {
+  background: #f0f4f8;
+  border-radius: 5px;
+  padding: 0.6rem 0.9rem;
+  flex: 1 1 130px;
+}
+
+.summary-chip .chip-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7a92;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.summary-chip .chip-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1b4f8a;
+}
+
+/* Plasma level note */
+.plasma-flag {
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+  border-left: 4px solid;
+}
+
+.plasma-flag.ok     { background: #f0faf4; border-color: #27ae60; color: #1a4030; }
+.plasma-flag.high   { background: #fff4f4; border-color: #c0392b; color: #5a1010; }
+.plasma-flag.low    { background: #fff8e1; border-color: #f5a623; color: #5a4000; }
+
+/* Taper table */
+.taper-table-wrap { overflow-x: auto; margin-bottom: 1.25rem; }
+
+.taper-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.taper-table th {
+  background: #1b4f8a;
+  color: #fff;
+  padding: 0.65rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.taper-table td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid #e8eef6;
+}
+
+.taper-table tr:nth-child(even) td { background: #f7f9fc; }
+
+.taper-table tr.target-row td { font-weight: 700; }
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-delivery { background: #d4edda; color: #155724; }
+.badge-reduce   { background: #fff3cd; color: #856404; }
+.badge-target   { background: #cce5ff; color: #004085; }
+
+/* Monitoring box */
+.monitoring {
+  background: #f7f9fc;
+  border-radius: 5px;
+  padding: 1rem 1.1rem;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.monitoring h3 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1b4f8a;
+  margin-bottom: 0.6rem;
+}
+
+.monitoring ul {
+  padding-left: 1.3rem;
+  line-height: 1.85;
+  color: #2d3d54;
+}
+
+.generated-note {
+  margin-top: 1.25rem;
+  font-size: 0.72rem;
+  color: #9aa5b8;
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.78rem;
+  color: #9aa5b8;
+  border-top: 1px solid #dde4ee;
+  background: #fff;
+}
+
+/* ── Print ────────────────────────────────────────────────── */
+@media print {
+  body { background: #fff; }
+  header {
+    background: #1b4f8a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .disclaimer, .form-actions, .results-actions,
+  #step-medication, #step-doses, footer { display: none !important; }
+  #results-section { display: block !important; }
+  .taper-table th {
+    background: #1b4f8a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .card { box-shadow: none; }
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .card { padding: 1.25rem 1rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .med-select { flex-direction: row; }
+  .summary-strip { flex-direction: column; }
+}
