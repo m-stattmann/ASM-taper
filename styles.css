@@ -360,6 +360,14 @@ input.invalid { border-color: #c0392b; }
 .badge-reduce   { background: #fff3cd; color: #856404; }
 .badge-target   { background: #cce5ff; color: #004085; }
 
+.step-note {
+  font-size: 0.72rem;
+  color: #6b7a92;
+  font-weight: 400;
+  display: block;
+  margin-top: 0.15rem;
+}
+
 /* Monitoring box */
 .monitoring {
   background: #f7f9fc;

@@ -19,21 +19,30 @@
 //        Clearance increases 2–3× during pregnancy. After delivery,
 //        oestrogen falls abruptly → clearance normalises within days
 //        to 1–2 weeks → rapid rise in plasma levels → toxicity risk.
-//        Taper to pre-pregnancy dose over 2–3 weeks.
-//        Ref: Pennell et al. (2008), Tomson et al. (2019 EURAP)
+//        Per epilepsypregnancy.com / MONEAD data:
+//          - First reduction: day 2 postpartum
+//          - Step interval:   every 4 days
+//          - Target dose:     ~116% of pre-pregnancy dose
+//        Ref: Pennell et al. (2004, 2008); epilepsypregnancy.com
 //
 //   LEV: Renal clearance increases ~50–100% during pregnancy
 //        (progesterone-mediated increased GFR and tubular secretion).
 //        Returns toward baseline within days postpartum, though
-//        more gradually than LTG. Taper over 2–3 weeks.
-//        Ref: Landmark et al. (2012), Johannessen et al. (2005)
+//        more gradually than LTG.
+//        Per epilepsypregnancy.com:
+//          - First reduction: day 3 postpartum
+//          - Step interval:   every 5 days
+//          - Target dose:     ~136% of pre-pregnancy dose
+//        Ref: Tomson, Landmark & Battino (2013); epilepsypregnancy.com
 
 const MEDS = {
   ltg: {
     label: 'Lamotrigine (LTG)',
     unit: 'mg/L',
-    roundTo: 25,           // tablet sizes: 25, 50, 100, 150, 200 mg
-    taperWeeks: 3,         // recommended taper duration
+    roundTo: 25,              // tablet sizes: 25, 50, 100, 150, 200 mg
+    firstStepDay: 2,          // first dose reduction at day 2 postpartum (MONEAD)
+    stepIntervalDays: 4,      // then every 4 days
+    targetMultiplier: 1.16,   // target ~116% of pre-pregnancy dose (MONEAD data)
     therapeuticRange: { low: 3, high: 15 },
     recommendation:
       '<strong>Why taper?</strong> LTG is cleared primarily by glucuronidation (UGT1A4), ' +
@@ -43,8 +52,11 @@ const MEDS = {
       'immediate postpartum period. Without dose reduction, plasma levels can rise ' +
       'into the toxic range within days of delivery.' +
       '<br><br>' +
-      '<strong>Recommendation:</strong> Taper back to the pre-pregnancy dose over ' +
-      '<strong>2–3 weeks</strong> (one reduction per week). ' +
+      '<strong>Recommendation (epilepsypregnancy.com / MONEAD):</strong> Begin first ' +
+      'reduction at <strong>day 2 postpartum</strong>, then every <strong>4 days</strong> ' +
+      'until target is reached (~2 weeks total). ' +
+      'The target is set at <strong>~116% of the pre-pregnancy dose</strong> — slightly ' +
+      'above baseline to buffer against postpartum sleep deprivation and stress. ' +
       'Plasma level monitoring at delivery and at 1 week postpartum is strongly advised.',
     monitoring: [
       'Check plasma level at delivery (baseline)',
@@ -57,8 +69,10 @@ const MEDS = {
   lev: {
     label: 'Levetiracetam (LEV)',
     unit: 'mg/L',
-    roundTo: 250,          // tablet sizes: 250, 500, 750, 1000 mg
-    taperWeeks: 3,
+    roundTo: 500,             // standard tablet sizes: 500, 1000 mg
+    firstStepDay: 3,          // first dose reduction at day 3 postpartum
+    stepIntervalDays: 5,      // then every 5 days
+    targetMultiplier: 1.36,   // target ~136% of pre-pregnancy dose
     therapeuticRange: { low: 12, high: 46 },
     recommendation:
       '<strong>Why taper?</strong> LEV is renally cleared, and renal clearance increases ' +
@@ -66,8 +80,11 @@ const MEDS = {
       'After delivery, clearance returns toward baseline over days to weeks — somewhat ' +
       'more gradually than LTG, but dose reduction is still required to prevent accumulation.' +
       '<br><br>' +
-      '<strong>Recommendation:</strong> Taper back to the pre-pregnancy dose over ' +
-      '<strong>2–3 weeks</strong> (one reduction per week). ' +
+      '<strong>Recommendation (epilepsypregnancy.com):</strong> Begin first reduction at ' +
+      '<strong>day 3 postpartum</strong>, then every <strong>5 days</strong> until target ' +
+      'is reached (~2 weeks total). ' +
+      'The target is set at <strong>~136% of the pre-pregnancy dose</strong> — slightly ' +
+      'above baseline to buffer against postpartum sleep deprivation and stress. ' +
       'Plasma level monitoring in the first week postpartum is recommended.',
     monitoring: [
       'Check plasma level at delivery (baseline)',
@@ -166,69 +183,41 @@ function generate() {
   $('current-dose').classList.remove('invalid');
 
   // Determine target dose
+  // Per epilepsypregnancy.com: target is set slightly above the pre-pregnancy
+  // dose (LTG: ~116%, LEV: ~136%) to buffer against postpartum sleep
+  // deprivation and stress, which are independent seizure triggers.
   let targetDose;
   let targetNote = '';
 
   if (!isNaN(prePregDose) && prePregDose > 0) {
     if (prePregDose >= currentDose) {
-      // No taper needed or dose already at/below pre-preg
       alert(
         'The pre-pregnancy dose is equal to or higher than the current dose. ' +
         'No postpartum dose reduction may be required. Please review the entries.'
       );
       return;
     }
-    targetDose = prePregDose;
-    targetNote = 'Pre-pregnancy dose';
+    // Apply postpartum target multiplier
+    const adjustedTarget = roundNearest(prePregDose * med.targetMultiplier, med.roundTo);
+    if (adjustedTarget >= currentDose) {
+      // Multiplier pushes target above current dose — no meaningful taper needed
+      targetDose = prePregDose;
+      targetNote = 'minimal';
+    } else {
+      targetDose = adjustedTarget;
+      targetNote = 'adjusted';
+    }
   } else {
-    // Estimate: halve the excess above a sensible baseline
-    // Common heuristic: target ≈ 50% of pregnancy dose when pre-preg unknown
+    // Pre-pregnancy dose unknown — estimate as 50% of delivery dose
     targetDose = roundNearest(currentDose * 0.5, med.roundTo);
-    targetNote = 'Estimated (pre-pregnancy dose unknown — please verify)';
+    targetNote = 'estimated';
   }
 
   // ── Build taper schedule ──────────────────────────────────
-  //
-  // Strategy: evenly distribute the dose reduction across
-  // the recommended number of weeks (one step per week).
-  // Then round each step to the nearest clinically practical
-  // tablet increment.
-
-  const totalReduction = currentDose - targetDose;
-  const weeks = med.taperWeeks;
-
-  const steps = [];
-
-  // Delivery / step 0
-  steps.push({
-    week: 0,
-    label: 'Delivery',
-    dose: currentDose,
-    date: deliveryDate ? dateLabel(deliveryDate, 0) : null,
-    badge: 'delivery',
-  });
-
-  // Intermediate reductions
-  for (let w = 1; w < weeks; w++) {
-    const raw = currentDose - (totalReduction * w) / weeks;
-    const dose = roundNearest(raw, med.roundTo);
-    steps.push({
-      week: w,
-      label: `Week ${w}`,
-      dose: Math.max(dose, targetDose),
-      date: deliveryDate ? dateLabel(deliveryDate, w * 7) : null,
-      badge: 'reduce',
-    });
-  }
-
-  // Final target
-  steps.push({
-    week: weeks,
-    label: `Week ${weeks} — target`,
-    dose: targetDose,
-    date: deliveryDate ? dateLabel(deliveryDate, weeks * 7) : null,
-    badge: 'target',
-  });
+  const steps = buildTaperSteps(
+    currentDose, targetDose, med.roundTo, deliveryDate,
+    med.firstStepDay, med.stepIntervalDays
+  );
 
   // ── Render ────────────────────────────────────────────────
   renderResults({
@@ -267,16 +256,28 @@ function renderResults({ med, currentDose, targetDose, targetNote,
     </div>
     <div class="summary-chip">
       <div class="chip-label">Duration</div>
-      <div class="chip-val">${med.taperWeeks} weeks</div>
+      <div class="chip-val">${durationLabel(steps)}</div>
     </div>
   </div>`;
 
-  // Target note if estimated
-  if (targetNote.includes('Estimated')) {
+  // Target note
+  if (targetNote === 'adjusted') {
+    html += `<div class="plasma-flag ok" style="margin-bottom:1.25rem;">
+      ✓ <strong>Target dose set at ${targetDose} mg/day</strong> (~${Math.round(med.targetMultiplier * 100)}% of pre-pregnancy dose).
+      This is intentionally slightly above the pre-pregnancy dose to buffer against
+      postpartum sleep deprivation and stress, per epilepsypregnancy.com guidance.
+    </div>`;
+  } else if (targetNote === 'estimated') {
     html += `<div class="plasma-flag low" style="margin-bottom:1.25rem;">
       ⚠ <strong>Pre-pregnancy dose not provided.</strong>
       Target dose of <strong>${targetDose} mg/day</strong> is an estimate (50% of delivery dose).
       Verify against the patient's clinical history before use.
+    </div>`;
+  } else if (targetNote === 'minimal') {
+    html += `<div class="plasma-flag low" style="margin-bottom:1.25rem;">
+      ⚠ <strong>Minimal postpartum reduction expected.</strong>
+      The adjusted target (${Math.round(med.targetMultiplier * 100)}% of pre-pregnancy dose)
+      is close to the current delivery dose. Review whether dose adjustment is needed.
     </div>`;
   }
 
@@ -320,14 +321,14 @@ function renderResults({ med, currentDose, targetDose, targetNote,
     const prev = i === 0 ? s.dose : steps[i - 1].dose;
     const change = i === 0 ? '—' : `↓ ${prev - s.dose} mg`;
     const perDose = roundNearest(s.dose / dosesPerDay, dosesPerDay === 1 ? 1 : 0.5);
-    const badgeLabel = s.badge === 'delivery' ? 'Delivery'
+    const badgeLabel = s.badge === 'delivery' ? 'Pre-delivery'
                      : s.badge === 'target'   ? 'Target reached' : 'Reduce';
     const badgeClass = `badge-${s.badge}`;
     const rowClass = s.badge === 'target' ? ' class="target-row"' : '';
 
     html += `<tr${rowClass}>
       ${hasDates ? `<td>${s.date}</td>` : ''}
-      <td>${s.label}</td>
+      <td>${s.label}${s.note ? `<br><span class="step-note">${s.note}</span>` : ''}</td>
       <td><strong>${s.dose} mg</strong></td>
       <td>${perDose} mg</td>
       <td>${i === 0 ? `<span class="badge ${badgeClass}">${badgeLabel}</span>` : change}</td>
@@ -349,6 +350,111 @@ function renderResults({ med, currentDose, targetDose, targetNote,
   $('step-doses').classList.add('hidden');
   $('results-section').classList.remove('hidden');
   $('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Taper step builder ────────────────────────────────────────
+//
+// Timing per epilepsypregnancy.com:
+//   LTG: first step day 2, then every 4 days
+//   LEV: first step day 3, then every 5 days
+//
+// Two scenarios:
+//
+//   Small reduction (≤ 2 tablet steps):
+//     Single-step reduction at firstStepDay — no prolonged taper needed.
+//
+//   Standard reduction (> 2 tablet steps):
+//     Step 1 — day firstStepDay:              ~1/3 of total reduction
+//     Step 2 — day firstStepDay + interval:   half the remainder
+//     Step 3 — day firstStepDay + 2×interval: reach target (if needed)
+//
+function buildTaperSteps(currentDose, targetDose, roundTo, deliveryDate,
+                          firstStepDay, stepIntervalDays) {
+  const totalReduction = currentDose - targetDose;
+  const steps = [];
+
+  // Context row — dose patient is on at delivery (no change yet)
+  steps.push({
+    label: 'Delivery dose',
+    dose: currentDose,
+    date: deliveryDate ? dateLabel(deliveryDate, 0) : null,
+    badge: 'delivery',
+    note: null,
+  });
+
+  // ── Edge case: small reduction ────────────────────────────
+  // ≤ 2 tablet increments — single-step reduction at firstStepDay.
+  if (totalReduction <= roundTo * 2) {
+    steps.push({
+      label: `Day ${firstStepDay} postpartum`,
+      dose: targetDose,
+      date: deliveryDate ? dateLabel(deliveryDate, firstStepDay) : null,
+      badge: 'target',
+      note: 'Small adjustment — single-step reduction.',
+    });
+    return steps;
+  }
+
+  // ── Standard taper ────────────────────────────────────────
+  // Step 1: first reduction at firstStepDay (~1/3 of total)
+  const day1 = firstStepDay;
+  const step1reduction = roundNearest(totalReduction / 3, roundTo);
+  const step1dose = currentDose - step1reduction;
+  steps.push({
+    label: `Day ${day1} postpartum`,
+    dose: step1dose,
+    date: deliveryDate ? dateLabel(deliveryDate, day1) : null,
+    badge: 'reduce',
+    note: 'First reduction — do not reduce before this day.',
+  });
+
+  // Step 2: half the remaining reduction
+  const day2 = day1 + stepIntervalDays;
+  const remaining = step1dose - targetDose;
+  const step2dose = roundNearest(step1dose - remaining / 2, roundTo);
+
+  if (step2dose > targetDose) {
+    steps.push({
+      label: `Day ${day2} postpartum`,
+      dose: step2dose,
+      date: deliveryDate ? dateLabel(deliveryDate, day2) : null,
+      badge: 'reduce',
+      note: null,
+    });
+    // Step 3: reach target
+    const day3 = day2 + stepIntervalDays;
+    steps.push({
+      label: `Day ${day3} postpartum — target`,
+      dose: targetDose,
+      date: deliveryDate ? dateLabel(deliveryDate, day3) : null,
+      badge: 'target',
+      note: null,
+    });
+  } else {
+    // Remaining fits in one more step
+    steps.push({
+      label: `Day ${day2} postpartum — target`,
+      dose: targetDose,
+      date: deliveryDate ? dateLabel(deliveryDate, day2) : null,
+      badge: 'target',
+      note: null,
+    });
+  }
+
+  return steps;
+}
+
+function durationLabel(steps) {
+  const taperSteps = steps.length - 1;
+  if (taperSteps === 1) return 'Single step';
+  // Approximate total days from the last step label
+  const lastLabel = steps[steps.length - 1].label;
+  const match = lastLabel.match(/Day (\d+)/);
+  if (match) {
+    const days = parseInt(match[1]);
+    return `~${Math.ceil(days / 7)} week${days > 7 ? 's' : ''}`;
+  }
+  return '~2 weeks';
 }
 
 // ── Helpers ───────────────────────────────────────────────────
