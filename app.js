@@ -57,8 +57,10 @@ const MEDS = {
       'until target is reached (~2 weeks total). ' +
       'The target is set at <strong>~116% of the pre-pregnancy dose</strong> — slightly ' +
       'above baseline to buffer against postpartum sleep deprivation and stress. ' +
-      'Plasma level monitoring at delivery and at 1 week postpartum is strongly advised.',
+      'Plasma level monitoring at delivery and at 1 week postpartum is strongly advised. ' +
+      '<strong>Dose reduction should be reviewed with the treating neurologist before implementation.</strong>',
     monitoring: [
+      'Confirm taper plan with treating neurologist before initiating',
       'Check plasma level at delivery (baseline)',
       'Repeat plasma level at 1 week postpartum',
       'Repeat at each dose step if levels are available',
@@ -85,8 +87,10 @@ const MEDS = {
       'is reached (~2 weeks total). ' +
       'The target is set at <strong>~136% of the pre-pregnancy dose</strong> — slightly ' +
       'above baseline to buffer against postpartum sleep deprivation and stress. ' +
-      'Plasma level monitoring in the first week postpartum is recommended.',
+      'Plasma level monitoring in the first week postpartum is recommended. ' +
+      '<strong>Dose reduction should be reviewed with the treating neurologist before implementation.</strong>',
     monitoring: [
+      'Confirm taper plan with treating neurologist before initiating',
       'Check plasma level at delivery (baseline)',
       'Repeat plasma level at 1 week postpartum',
       'Watch for dose-dependent side effects: irritability, mood changes',
