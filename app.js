@@ -324,7 +324,7 @@ function renderResults({ med, currentDose, targetDose, targetNote,
   steps.forEach((s, i) => {
     const prev = i === 0 ? s.dose : steps[i - 1].dose;
     const change = i === 0 ? '—' : `↓ ${prev - s.dose} mg`;
-    const perDose = roundNearest(s.dose / dosesPerDay, dosesPerDay === 1 ? 1 : 0.5);
+    const perDose = formatPerDose(s.dose, dosesPerDay, med.roundTo);
     const badgeLabel = s.badge === 'delivery' ? 'Pre-delivery'
                      : s.badge === 'target'   ? 'Target reached' : 'Reduce';
     const badgeClass = `badge-${s.badge}`;
@@ -334,12 +334,21 @@ function renderResults({ med, currentDose, targetDose, targetNote,
       ${hasDates ? `<td>${s.date}</td>` : ''}
       <td>${s.label}${s.note ? `<br><span class="step-note">${s.note}</span>` : ''}</td>
       <td><strong>${s.dose} mg</strong></td>
-      <td>${perDose} mg</td>
+      <td>${perDose}</td>
       <td>${i === 0 ? `<span class="badge ${badgeClass}">${badgeLabel}</span>` : change}</td>
     </tr>`;
   });
 
   html += `</tbody></table></div>`;
+
+  // Per-dose footnote (only relevant when split dosing)
+  if (dosesPerDay > 1) {
+    html += `<p style="font-size:0.78rem;color:#6b7a92;margin-bottom:1.25rem;">
+      * Per-dose figures show the most practical tablet-based split.
+      Uneven distribution is clinically acceptable — e.g. a larger morning dose
+      and smaller evening dose, or vice versa, according to patient preference.
+    </p>`;
+  }
 
   // Monitoring
   html += `<div class="monitoring">
@@ -471,4 +480,34 @@ function dateLabel(startStr, offsetDays) {
   const d = new Date(startStr);
   d.setDate(d.getDate() + offsetDays);
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// Format a per-dose string for split dosing.
+// Produces practical tablet-based splits (e.g. "250 + 225 mg" for 475 mg BID)
+// rather than the mathematically exact but impractical 237.5 mg.
+// All daily doses passed in should already be multiples of roundTo.
+function formatPerDose(dailyDose, dosesPerDay, roundTo) {
+  if (dosesPerDay === 1) return `${dailyDose} mg`;
+
+  // Round a value UP to the nearest multiple of r
+  const ceilTo = (v, r) => Math.ceil(v / r) * r;
+
+  if (dosesPerDay === 2) {
+    const d1 = ceilTo(dailyDose / 2, roundTo);
+    const d2 = dailyDose - d1;
+    // Even split, or guard against pathological rounding edge
+    if (d2 <= 0 || d1 === d2) return `${dailyDose / 2} mg`;
+    return `${d1} + ${d2} mg`;
+  }
+
+  if (dosesPerDay === 3) {
+    const d1 = ceilTo(dailyDose / 3, roundTo);
+    const rem = dailyDose - d1;
+    const d2 = ceilTo(rem / 2, roundTo);
+    const d3 = rem - d2;
+    if (d3 <= 0 || (d1 === d2 && d2 === d3)) return `${Math.round(dailyDose / 3)} mg`;
+    return `${d1} + ${d2} + ${d3} mg`;
+  }
+
+  return `${Math.round(dailyDose / dosesPerDay)} mg`;
 }
